@@ -61,7 +61,7 @@ function fetchNews() {
   });
 }
 
-// 更严格筛选：只有 titlestyle=3（官方推荐）才发
+// 只推送官方推荐的（titlestyle=3）
 function isImportantNews(item) {
   return item.titlestyle === '3';
 }
@@ -82,7 +82,16 @@ async function checkAndNotify() {
     
     for (const item of newsList) {
       if (isImportantNews(item) && !sentSet.has(item.id)) {
-        const content = `【财经要闻】${item.title}`;
+        // 提取摘要，去掉开头的【...】标签
+        let digest = item.digest || '';
+        digest = digest.replace(/^【[^】]+】/, '').trim();
+        
+        // 组装消息：标题 + 摘要
+        let content = `【财经要闻】${item.title}`;
+        if (digest) {
+          content += `\n\n${digest}`;
+        }
+        
         console.log('发送:', item.title);
         
         try {
